@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagtingin — A Musical Letter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0b0b10;
+      color: #ffffff;
+      font-family: 'Georgia', serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Envelope Styles */
+    .envelope-wrapper {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.6s ease, opacity 0.8s ease;
+      z-index: 10;
+    }
+
+    .envelope {
+      width: 280px;
+      height: 190px;
+      background: #1e1b2e;
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 215, 0, 0.2);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 140px solid transparent;
+      border-right: 140px solid transparent;
+      border-top: 100px solid #2a263d;
+      transform-origin: top;
+      transition: transform 0.6s ease;
+    }
+
+    .wax-seal {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: #c0392b;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      border: 2px solid #e74c3c;
+      z-index: 2;
+    }
+
+    .envelope-text {
+      position: absolute;
+      bottom: 25px;
+      font-size: 0.9rem;
+      color: #d1ccc0;
+      letter-spacing: 1px;
+    }
+
+    .envelope-wrapper.open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-wrapper.fade-out {
+      opacity: 0;
+      transform: scale(0.8);
+      pointer-events: none;
+    }
+
+    /* Lyrics Display Container */
+    .letter-stage {
+      position: absolute;
+      width: 90%;
+      max-width: 500px;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 5;
+    }
+
+    .lyric-line {
+      font-size: 1.5rem;
+      line-height: 2.2rem;
+      color: #f5f5f7;
+      font-style: italic;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+      position: absolute;
+      padding: 0 20px;
+    }
+
+    .lyric-line.show {
+      opacity: 1;
+    }
+
+    /* Final Meme Container */
+    .meme-display {
+      max-width: 300px;
+      max-height: 300px;
+      border-radius: 12px;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+      border: 2px solid rgba(255, 215, 0, 0.6);
+      position: absolute;
+    }
+
+    .meme-display.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Interactive Letter Envelope -->
+  <div class="envelope-wrapper" id="envelopeWrapper">
+    <div class="envelope">
+      <div class="envelope-flap"></div>
+      <div class="wax-seal">✉️</div>
+      <div class="envelope-text">Click to open letter...</div>
+    </div>
+  </div>
+
+  <!-- Central Display for Lyrics & Meme -->
+  <div class="letter-stage">
+    <div class="lyric-line" id="lyricDisplay"></div>
+    <img src="your-meme.jpg" id="memeDisplay" class="meme-display" alt="Final Meme" />
+  </div>
+
+  <audio id="bgAudio" src="song.mp3" preload="auto"></audio>
+
+  <script>
+    // Array containing each lyric line and its specific display duration in milliseconds (ms)
+const lyrics = [
+  { text: "Dami pang gustong sabihin", duration: 3000 },
+  { text: "Ngunit 'wag na lang muna", duration: 3000 },
+  { text: "Hintayin na lang ang hangin", duration: 3500 },
+  { text: "Tangayin ang salita", duration: 4000 },
+  { text: " ", duration: 1000},
+  { text: "'Wag mo akong sisihin", duration: 3500 },
+  { text: "Mahirap ang tumaya", duration: 4000 },
+  { text: "Dagat ay sisisirin", duration: 3000 },
+  { text: "Kahit walang mapala", duration: 4000 },
+  { text: "'Pag nilahad ang damdamin", duration: 3000 },
+  { text: "Sana 'di magbago ang pagtingin", duration: 3500 },
+  { text: "Aminin ang mga lihim", duration: 4000 },
+  { text: "Sana 'di magbago ang pagtingin ", duration: 4000}
+];
+
+
+let currentLine = 0;
+const envelopeWrapper = document.getElementById('envelopeWrapper');
+const lyricDisplay = document.getElementById('lyricDisplay');
+const memeDisplay = document.getElementById('memeDisplay');
+const bgAudio = document.getElementById('bgAudio');
+
+function playLyricSequence() {
+  if (currentLine < lyrics.length) {
+    const lineData = lyrics[currentLine];
+    
+    // Set text for current line
+    lyricDisplay.textContent = lineData.text;
+    
+    // Slowly Fade In
+    lyricDisplay.classList.add('show');
+
+    // Hold line on screen for its specific duration
+    setTimeout(() => {
+      // Slowly Fade Out
+      lyricDisplay.classList.remove('show');
+      currentLine++;
+
+      // Delay gap before showing the next line
+      setTimeout(playLyricSequence, 1500);
+    }, lineData.duration);
+
+  } else {
+    // Show Final Meme with smooth fade in
+    setTimeout(() => {
+      memeDisplay.classList.add('show');
+    }, 1000);
+  }
+}
+const START_TIME = 0;
+const END_TIME = 63;
+
+envelopeWrapper.addEventListener('click', () => {
+  envelopeWrapper.classList.add('open');
+  
+  // Jump to the start time before playing
+  bgAudio.currentTime = START_TIME;
+  bgAudio.play().catch(err => console.log('Audio error:', err));
+
+  // Check current time while audio plays to stop at END_TIME
+  bgAudio.addEventListener('timeupdate', () => {
+    if (bgAudio.currentTime >= END_TIME) {
+      bgAudio.pause();
+    }
+  });
+
+  setTimeout(() => {
+    envelopeWrapper.classList.add('fade-out');
+    setTimeout(playLyricSequence, 1000);
+  }, 700);
+});
+  </script>
+</body>
+</html>
