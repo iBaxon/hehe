@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pagtingin — A Musical Letter</title>
+  <title>Para kay Kokoy</title>
   <style>
     * {
       box-sizing: border-box;
@@ -23,7 +23,6 @@
       align-items: center;
     }
 
-    /* Envelope Styles */
     .envelope-wrapper {
       position: relative;
       cursor: pointer;
@@ -90,7 +89,6 @@
       pointer-events: none;
     }
 
-    /* Lyrics Display Container */
     .letter-stage {
       position: absolute;
       width: 90%;
@@ -119,7 +117,6 @@
       opacity: 1;
     }
 
-    /* Final Meme Container */
     .meme-display {
       max-width: 300px;
       max-height: 300px;
@@ -139,16 +136,14 @@
 </head>
 <body>
 
-  <!-- Interactive Letter Envelope -->
   <div class="envelope-wrapper" id="envelopeWrapper">
     <div class="envelope">
       <div class="envelope-flap"></div>
       <div class="wax-seal">✉️</div>
-      <div class="envelope-text">Click to open letter...</div>
+      <div class="envelope-text">PISLITA NING LETTER</div>
     </div>
   </div>
 
-  <!-- Central Display for Lyrics & Meme -->
   <div class="letter-stage">
     <div class="lyric-line" id="lyricDisplay"></div>
     <img src="your-meme.jpg" id="memeDisplay" class="meme-display" alt="Final Meme" />
@@ -157,7 +152,6 @@
   <audio id="bgAudio" src="song.mp3" preload="auto"></audio>
 
   <script>
-    // Array containing each lyric line and its specific display duration in milliseconds (ms)
 const lyrics = [
   { text: "Dami pang gustong sabihin", duration: 3000 },
   { text: "Ngunit 'wag na lang muna", duration: 3000 },
@@ -185,24 +179,18 @@ function playLyricSequence() {
   if (currentLine < lyrics.length) {
     const lineData = lyrics[currentLine];
     
-    // Set text for current line
     lyricDisplay.textContent = lineData.text;
     
-    // Slowly Fade In
     lyricDisplay.classList.add('show');
 
-    // Hold line on screen for its specific duration
     setTimeout(() => {
-      // Slowly Fade Out
       lyricDisplay.classList.remove('show');
       currentLine++;
 
-      // Delay gap before showing the next line
       setTimeout(playLyricSequence, 1500);
     }, lineData.duration);
 
   } else {
-    // Show Final Meme with smooth fade in
     setTimeout(() => {
       memeDisplay.classList.add('show');
     }, 1000);
@@ -214,11 +202,9 @@ const END_TIME = 63;
 envelopeWrapper.addEventListener('click', () => {
   envelopeWrapper.classList.add('open');
   
-  // Jump to the start time before playing
   bgAudio.currentTime = START_TIME;
   bgAudio.play().catch(err => console.log('Audio error:', err));
 
-  // Check current time while audio plays to stop at END_TIME
   bgAudio.addEventListener('timeupdate', () => {
     if (bgAudio.currentTime >= END_TIME) {
       bgAudio.pause();
